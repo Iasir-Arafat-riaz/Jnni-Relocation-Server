@@ -11,8 +11,7 @@ const port = process.env.PORT || 2021;
 app.use(cors());
 app.use(express.json());
 
-// Jinni-Relocation
-// e55d7lsv0emlFoXc
+
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.gukqi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -25,8 +24,11 @@ async function run() {
   try {
     await client.connect();
     const database = client.db("JinniRelocation");
+
     const services = database.collection("services");
     const booking = database.collection("booking");
+    const users = database.collection("users")
+    const reviews = database.collection("reviews");
 
 
     //start from this
@@ -73,6 +75,59 @@ app.delete("/booking/:id", async (req, res) => {
   const restOrder = await booking.deleteOne(remove);
   res.json(restOrder);
 });
+
+//Review functionalities
+
+app.post("/reviews", async (req, res) => {
+  const review = req.body;
+  const result = await reviews.insertOne(review);
+  res.json(result);
+});
+
+//userReviewGet
+app.get("/reviews", async (req, res) => {
+  const result = await reviews.find({}).toArray();
+  res.json(result);
+});
+
+
+
+
+//users functionalities
+
+app.put("/users", async (req, res) => {
+  const user = req.body;
+  const filter = { email: user.email };
+  const option = { upsert: true };
+  const updateDoc = { $set: user };
+  const result = await users.updateOne(filter, updateDoc, option);
+  res.json(result);
+});
+
+//Set Admin Role
+app.put("/users/admin", async (req, res) => {
+  const user = req.body;
+  console.log(user);
+  const filter = { email: user.email };
+  const updateDoc = { $set: { role: "admin" } };
+  const result = await users.updateOne(filter, updateDoc);
+  res.json(result);
+});
+
+// check admin for website access (get operation)
+app.get("/users/:email", async (req, res) => {
+  const email = req.params.email;
+  const query = { email: email };
+  const user = await users.findOne(query);
+  let isAdmin = false;
+  if (user?.role === "admin") {
+    isAdmin = true;
+  }
+  res.json({ admin: isAdmin });
+});
+
+
+
     
   } 
   
