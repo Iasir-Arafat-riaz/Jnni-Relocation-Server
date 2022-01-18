@@ -40,6 +40,13 @@ async function run() {
 })
 
 //find all services
+app.get("/allServices", async(req,res)=>{
+  const findservice = services.find({})
+  const result = await findservice.toArray()
+  res.json(result)
+
+})
+
 app.get("/services", async(req,res)=>{
   // const findservice = services.find({})
   //Get Services Dynamically ------Randomly
@@ -49,6 +56,7 @@ app.get("/services", async(req,res)=>{
   res.json(result)
 
 })
+
 //find single services
  app.get("/services/:id", async(req,res)=>{
   //  console.log(req.params.id);
