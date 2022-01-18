@@ -41,8 +41,11 @@ async function run() {
 
 //find all services
 app.get("/services", async(req,res)=>{
-  const findservice = services.find({})
-  const result = await findservice.toArray()
+  // const findservice = services.find({})
+  //Get Services Dynamically ------Randomly
+  const cursor = services.aggregate([{ $sample: { size: 4 } }])
+  const result = await cursor.toArray()
+ 
   res.json(result)
 
 })
